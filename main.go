@@ -12,7 +12,7 @@ var (
 	width         *uint64  = flag.Uint64("width", 1920, "Image width")
 	height        *uint64  = flag.Uint64("height", 1080, "Image height")
 	xMin          *float64 = flag.Float64("xMin", -2.5, "Minimum value of X painted on the image")
-	xMax          *float64 = flag.Float64("xMaz", 1, "Maximum value of X painted on the image")
+	xMax          *float64 = flag.Float64("xMax", 1, "Maximum value of X painted on the image")
 	yMin          *float64 = flag.Float64("yMin", -1, "Minimum value of X painted on the image")
 	yMax          *float64 = flag.Float64("yMax", 1, "Maximum value of X painted on the image")
 	maxIterations *uint64  = flag.Uint64("maxIterations", 100, "Maximum iteration count")
