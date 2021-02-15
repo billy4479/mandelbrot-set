@@ -36,3 +36,9 @@ $ ./mandelbrot-set -help
 This program generate an image of the mandelbrot set with the specified params (use -h to show them)
 Available colors are "Gray Scale" (0) and "HUE" (1)
 ```
+
+## Examples
+
+![](examples/base.png)
+
+![](examples/1.png)
