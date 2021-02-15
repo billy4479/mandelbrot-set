@@ -1,33 +1,38 @@
 package main
 
 import (
+	"flag"
 	"image"
 	"image/png"
 	"os"
 	"sync"
 )
 
-const (
-	width  uint64 = 1920
-	height uint64 = 1080
-	// width  uint64  = 3840
-	// height uint64  = 2160
-	r    float64 = 0.002
-	xMin float64 = -0.374004139 - r/2 + 0.0005
-	xMax float64 = xMin + r/2
-	yMin float64 = -0.659792175 - r/2 + 0.0005
-	yMax float64 = yMin + r/2
-	// xMin          float64 = -0.7463
-	// xMax          float64 = xMin + 0.005
-	// yMin          float64 = 0.1102
-	// yMax          float64 = yMin + 0.005
-	maxIterations uint64 = 1000
+var (
+	width         *uint64  = flag.Uint64("width", 1920, "Image width")
+	height        *uint64  = flag.Uint64("height", 1080, "Image height")
+	xMin          *float64 = flag.Float64("xMin", -2.5, "Minimum value of X painted on the image")
+	xMax          *float64 = flag.Float64("xMaz", 1, "Maximum value of X painted on the image")
+	yMin          *float64 = flag.Float64("yMin", -1, "Minimum value of X painted on the image")
+	yMax          *float64 = flag.Float64("yMax", 1, "Maximum value of X painted on the image")
+	maxIterations *uint64  = flag.Uint64("maxIterations", 100, "Maximum iteration count")
+	col           *int     = flag.Int("color", 1, "Color mode (use --help to see the available modes)")
+
+	out  *string = flag.String("out", "output.png", "The output image, maut be a png file")
+	help *bool   = flag.Bool("help", false, "Print a help message and exit")
 )
 
 func main() {
-	img := mandelbrotSet(xMin, xMax, yMin, yMax, width, height, maxIterations)
+	flag.Parse()
 
-	file, err := os.Create("output.png")
+	if *help {
+		printHelp()
+		return
+	}
+
+	img := mandelbrotSet(*xMin, *xMax, *yMin, *yMax, *width, *height, *maxIterations, *col)
+
+	file, err := os.Create(*out)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +45,7 @@ type img struct {
 	sync.Mutex
 }
 
-func mandelbrotSet(xMin, xMax, yMin, yMax float64, width, height, maxIterations uint64) image.Image {
+func mandelbrotSet(xMin, xMax, yMin, yMax float64, width, height, maxIterations uint64, col int) image.Image {
 	result := img{
 		img: image.NewRGBA(
 			image.Rect(0, 0, int(width), int(height)),
@@ -53,17 +58,17 @@ func mandelbrotSet(xMin, xMax, yMin, yMax float64, width, height, maxIterations 
 	for Px = 0; Px < width; Px++ {
 		for Py = 0; Py < height; Py++ {
 			wg.Add(1)
-			go func(xMin, xMax, yMin, yMax float64, width, height, maxIterations, x, y uint64) {
+			go func(xMin, xMax, yMin, yMax float64, width, height, maxIterations, x, y uint64, col int) {
 				p := newPixel(x, y)
 				p.computeComplexCoords(xMin, xMax, yMin, yMax, width, height)
 				p.computeIterationCount(maxIterations)
-				p.computeColor(maxIterations, HUE)
+				p.computeColor(maxIterations, col)
 
 				result.Lock()
 				result.img.Set(int(p.Px), int(p.Py), p.color)
 				result.Unlock()
 				wg.Done()
-			}(xMin, xMax, yMin, yMax, width, height, maxIterations, Px, Py)
+			}(xMin, xMax, yMin, yMax, width, height, maxIterations, Px, Py, col)
 		}
 	}
 
